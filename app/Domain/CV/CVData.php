@@ -6,7 +6,7 @@ class CVData
 
   //Hacer Mapper WorkExperience y Studies
   public readonly Name $name;
-  public readonly string $professional_profile;
+  public readonly ProfessionalProfile $professional_profile;
   /** @var WorkExperience[] */
   public $work_experience;
   /** @var Studies[]  */
@@ -14,7 +14,7 @@ class CVData
   public readonly string $skills;
 
 
-  public function __construct(Name $name, string $professional_profile, WorkExperience $work_experience, Studies $studies, string $skills)
+  public function __construct(Name $name, ProfessionalProfile $professional_profile, WorkExperience $work_experience, Studies $studies, string $skills)
   {
     $this->name = $name;
     $this->professional_profile = $professional_profile;
