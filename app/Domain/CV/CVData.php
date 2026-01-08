@@ -1,20 +1,16 @@
 <?php
-
-
 class CVData
 {
 
   //Hacer Mapper WorkExperience y Studies
   public readonly Name $name;
   public readonly ProfessionalProfile $professional_profile;
-  /** @var WorkExperience[] */
-  public $work_experience;
-  /** @var Studies[]  */
-  public $studies;
-  public readonly string $skills;
+  public WorkExperienceCollection $work_experience;
+  public StudiyCollection $studies;
+  public readonly SkillCollection $skills;
 
 
-  public function __construct(Name $name, ProfessionalProfile $professional_profile, WorkExperience $work_experience, Studies $studies, string $skills)
+  public function __construct(Name $name, ProfessionalProfile $professional_profile, WorkExperienceCollection $work_experience, StudiyCollection $studies, SkillCollection $skills)
   {
     $this->name = $name;
     $this->professional_profile = $professional_profile;
