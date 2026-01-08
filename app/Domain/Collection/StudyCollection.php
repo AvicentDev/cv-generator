@@ -4,7 +4,7 @@ use IteratorAggregate;
 use Countable;
 use ArrayIterator;
 
-class StudiyCollection implements IteratorAggregate, Countable
+class StudyCollection implements IteratorAggregate, Countable
 {
   /** @var Studies[] */
   private array $items = [];
