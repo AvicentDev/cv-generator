@@ -2,34 +2,44 @@
 
 class GenerateCVText
 {
-  public function generate(array $cv_data): string
+  public function generate(CVData $cv): string
   {
-    $data = $cv_data['data'];
+    $lines = [];
 
-    $cv = [];
 
-    $cv[] = strtoupper($data['name']);
-    $cv[] = '';
+    $lines[] = strtoupper($cv->name->value());
+    $lines[] = '';
 
-    $cv[] = 'PERFIL PROFESIONAL';
-    $cv[] = $data['professional_profile'];
-    $cv[] = '';
+    $lines[] = 'PERFIL PROFESIONAL';
+    $lines[] = $cv->professional_profile->value();
+    $lines[] = '';
 
-    $cv[] = 'EXPERIENCIA LABORAL';
-    foreach ($data['work_experience'] as $experience) {
-      $cv[] = '- ' . $experience;
+
+    $lines[] = 'EXPERIENCIA LABORAL';
+
+    foreach ($cv->work_experience->value() as $experience) {
+      $lines[] = '- ' . $experience;
     }
-    $cv[] = '';
 
-    $cv[] = 'ESTUDIOS';
-    foreach ($data['studies'] as $study) {
-      $cv[] = '- ' . $study;
+    $lines[] = '';
+
+
+
+    $lines[] = 'ESTUDIOS';
+
+    foreach ($cv->studies->value() as $study) {
+      $lines[] = '- ' . $study;
     }
-    $cv[] = '';
 
-    $cv[] = 'HABILIDADES';
-    $cv[] = implode(' · ', $data['skills']);
+    $lines[] = '';
 
-    return implode(PHP_EOL, $cv);
+
+    $lines[] = 'HABILIDADES';
+    $lines[] = implode(
+      ' · ',
+      $cv->skills->value()
+    );
+
+    return implode(PHP_EOL, $lines);
   }
 }
