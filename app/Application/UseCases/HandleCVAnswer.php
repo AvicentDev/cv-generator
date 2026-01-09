@@ -1,6 +1,6 @@
 <?php
 
-class HandleCVAnswer
+class HandleCVAnswer implements HandleCVAnswerInterface
 {
   public function handle(array $cv_data, string $answer): array
   {
