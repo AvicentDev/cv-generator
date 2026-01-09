@@ -16,6 +16,14 @@ class StudyCollection implements IteratorAggregate, Countable
     }
   }
 
+  public function value(): array
+  {
+    return array_map(
+      fn(Studies $study) => $study->value(),
+      $this->items
+    );
+  }
+
   public function add(Studies $studies): void
   {
     $this->items[] = $studies;

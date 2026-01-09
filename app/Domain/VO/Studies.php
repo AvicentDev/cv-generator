@@ -22,6 +22,16 @@ class Studies
     $this->duration    = $duration;
   }
 
+  public function value(): string
+  {
+    return sprintf(
+      '%s en %s (%s)',
+      $this->degree,
+      $this->institution,
+      $this->duration
+    );
+  }
+
   private function ensureDegreeIsValid(string $value): void
   {
     if (empty(trim($value))) {
