@@ -17,6 +17,15 @@ final class SkillCollection implements IteratorAggregate, Countable
     }
   }
 
+  public function value(): array
+  {
+    return array_map(
+      fn(Skill $skill) => $skill->value,
+      $this->items
+    );
+  }
+
+
   public function add(Skill $skill): void
   {
     $this->ensureNoDuplicates($skill);
