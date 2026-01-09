@@ -13,6 +13,11 @@ class ProfessionalProfile
     $this->value = $value;
   }
 
+  public function value()
+  {
+    return $this->value;
+  }
+
   private function ensureProfileIsValid(string $value): void
   {
     if (empty(trim($value))) {
