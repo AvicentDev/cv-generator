@@ -6,7 +6,6 @@ class GenerateCVText
   {
     $lines = [];
 
-
     $lines[] = strtoupper($cv->name->value());
     $lines[] = '';
 
@@ -14,31 +13,20 @@ class GenerateCVText
     $lines[] = $cv->professional_profile->value();
     $lines[] = '';
 
-
     $lines[] = 'EXPERIENCIA LABORAL';
-
     foreach ($cv->work_experience->value() as $experience) {
       $lines[] = '- ' . $experience;
     }
-
     $lines[] = '';
 
-
-
     $lines[] = 'ESTUDIOS';
-
     foreach ($cv->studies->value() as $study) {
       $lines[] = '- ' . $study;
     }
-
     $lines[] = '';
 
-
     $lines[] = 'HABILIDADES';
-    $lines[] = implode(
-      ' · ',
-      $cv->skills->value()
-    );
+    $lines[] = implode(' · ', $cv->skills->value());
 
     return implode(PHP_EOL, $lines);
   }

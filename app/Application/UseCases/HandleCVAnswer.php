@@ -4,7 +4,7 @@ class HandleCVAnswer implements HandleCVAnswerInterface
 {
   public function handle(array $cv_data, string $answer): array
   {
-    $step = $cv_data['step'];
+    $step = $cv_data['step'] ?? 'name';
 
     match ($step) {
       'name' => $this->handleName($cv_data, $answer),
@@ -29,21 +29,45 @@ class HandleCVAnswer implements HandleCVAnswerInterface
   {
     $cv_data['data']['professional_profile'] = $answer;
     $cv_data['step'] = 'work_experience';
-    $cv_data['message'] = 'Describe tu experiencia laboral (puedes escribirla en un solo texto)';
+    $cv_data['message'] = 'Describe tu experiencia laboral. Formato: "Cargo;Empresa;Años;Meses;Días"';
   }
 
   private function handleWorkExperience(array &$cv_data, string $answer): void
   {
-    $cv_data['data']['work_experience'][] = $answer;
+    [$job_title, $company, $years, $months, $days] = explode(';', $answer);
+
+    $experience = [
+      'job_title' => trim($job_title),
+      'company_name' => trim($company),
+      'duration' => [
+        'years' => (int)$years,
+        'months' => (int)$months,
+        'days' => (int)$days
+      ]
+    ];
+
+    $cv_data['data']['work_experience'][] = $experience;
     $cv_data['step'] = 'studies';
-    $cv_data['message'] = '¿Cuáles son tus estudios?';
+    $cv_data['message'] = '¿Cuáles son tus estudios? Formato: "Título;Institución;Años;Meses;Días"';
   }
 
   private function handleStudies(array &$cv_data, string $answer): void
   {
-    $cv_data['data']['studies'][] = $answer;
+    [$degree, $institution, $years, $months, $days] = explode(';', $answer);
+
+    $study = [
+      'degree' => trim($degree),
+      'institution' => trim($institution),
+      'duration' => [
+        'years' => (int)$years,
+        'months' => (int)$months,
+        'days' => (int)$days
+      ]
+    ];
+
+    $cv_data['data']['studies'][] = $study;
     $cv_data['step'] = 'skills';
-    $cv_data['message'] = 'Por último, dime tus habilidades principales';
+    $cv_data['message'] = 'Por último, dime tus habilidades principales separadas por comas';
   }
 
   private function handleSkills(array &$cv_data, string $answer): void
