@@ -1,10 +1,22 @@
 <?php
+
 final class HandleCVAnswer implements HandleCVAnswerInterface
 {
   public function handle(
     CVConversationState $state,
     string $answer
   ): CVConversationState {
+
+    if (
+      $state->step === 'work_experience'
+      && strtolower(trim($answer)) === 'no'
+    ) {
+      return new CVConversationState(
+        step: 'studies',
+        draft: $state->draft,
+        message: '¿Cuáles son tus estudios? Formato: "Título;Institución;Años;Meses;Días"'
+      );
+    }
 
     return match ($state->step) {
       'name' => $this->handleName($state, $answer),
@@ -16,9 +28,11 @@ final class HandleCVAnswer implements HandleCVAnswerInterface
     };
   }
 
-  private function handleName(CVConversationState $state, string $answer): CVConversationState
-  {
-    $state->draft->name = $answer;
+  private function handleName(
+    CVConversationState $state,
+    string $answer
+  ): CVConversationState {
+    $state->draft->name = trim($answer);
 
     return new CVConversationState(
       step: 'professional_profile',
@@ -27,9 +41,11 @@ final class HandleCVAnswer implements HandleCVAnswerInterface
     );
   }
 
-  private function handleProfessionalProfile(CVConversationState $state, string $answer): CVConversationState
-  {
-    $state->draft->professionalProfile = $answer;
+  private function handleProfessionalProfile(
+    CVConversationState $state,
+    string $answer
+  ): CVConversationState {
+    $state->draft->professionalProfile = trim($answer);
 
     return new CVConversationState(
       step: 'work_experience',
@@ -38,9 +54,30 @@ final class HandleCVAnswer implements HandleCVAnswerInterface
     );
   }
 
-  private function handleWorkExperience(CVConversationState $state, string $answer): CVConversationState
-  {
-    [$job, $company, $y, $m, $d] = array_map('trim', explode(';', $answer));
+  private function handleWorkExperience(
+    CVConversationState $state,
+    string $answer
+  ): CVConversationState {
+
+    $parts = $this->explodeOrFail($answer, 5);
+
+    if (!$parts) {
+      return new CVConversationState(
+        step: 'work_experience',
+        draft: $state->draft,
+        message: 'Formato inválido. Usa: Cargo;Empresa;Años;Meses;Días'
+      );
+    }
+
+    [$job, $company, $y, $m, $d] = $parts;
+
+    if (!ctype_digit($y) || !ctype_digit($m) || !ctype_digit($d)) {
+      return new CVConversationState(
+        step: 'work_experience',
+        draft: $state->draft,
+        message: 'La duración debe ser numérica (Años;Meses;Días)'
+      );
+    }
 
     $state->draft->workExperience[] = [
       'job_title' => $job,
@@ -53,15 +90,36 @@ final class HandleCVAnswer implements HandleCVAnswerInterface
     ];
 
     return new CVConversationState(
-      step: 'studies',
+      step: 'work_experience',
       draft: $state->draft,
-      message: '¿Cuáles son tus estudios? Formato: "Título;Institución;Años;Meses;Días"'
+      message: 'Experiencia añadida 👍 ¿Quieres añadir otra? Si no, escribe "no"'
     );
   }
 
-  private function handleStudies(CVConversationState $state, string $answer): CVConversationState
-  {
-    [$degree, $institution, $y, $m, $d] = array_map('trim', explode(';', $answer));
+  private function handleStudies(
+    CVConversationState $state,
+    string $answer
+  ): CVConversationState {
+
+    $parts = $this->explodeOrFail($answer, 5);
+
+    if (!$parts) {
+      return new CVConversationState(
+        step: 'studies',
+        draft: $state->draft,
+        message: 'Formato inválido. Usa: Título;Institución;Años;Meses;Días'
+      );
+    }
+
+    [$degree, $institution, $y, $m, $d] = $parts;
+
+    if (!ctype_digit($y) || !ctype_digit($m) || !ctype_digit($d)) {
+      return new CVConversationState(
+        step: 'studies',
+        draft: $state->draft,
+        message: 'La duración debe ser numérica (Años;Meses;Días)'
+      );
+    }
 
     $state->draft->studies[] = [
       'degree' => $degree,
@@ -76,12 +134,14 @@ final class HandleCVAnswer implements HandleCVAnswerInterface
     return new CVConversationState(
       step: 'skills',
       draft: $state->draft,
-      message: 'Por último, dime tus habilidades principales separadas por comas'
+      message: 'Por último, dime tus habilidades separadas por comas'
     );
   }
 
-  private function handleSkills(CVConversationState $state, string $answer): CVConversationState
-  {
+  private function handleSkills(
+    CVConversationState $state,
+    string $answer
+  ): CVConversationState {
     $state->draft->skills = array_map('trim', explode(',', $answer));
 
     return new CVConversationState(
@@ -89,5 +149,12 @@ final class HandleCVAnswer implements HandleCVAnswerInterface
       draft: $state->draft,
       message: '¡Perfecto! Ya tengo toda la información para tu CV 🎉'
     );
+  }
+
+
+  private function explodeOrFail(string $answer, int $expected): ?array
+  {
+    $parts = array_map('trim', explode(';', $answer));
+    return count($parts) === $expected ? $parts : null;
   }
 }
