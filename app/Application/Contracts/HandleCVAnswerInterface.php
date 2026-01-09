@@ -2,5 +2,8 @@
 
 interface HandleCVAnswerInterface
 {
-  public function handle(array $cv_data, string $answer);
+  public function handle(
+    CVConversationState $state,
+    string $answer
+  ): CVConversationState;
 }
