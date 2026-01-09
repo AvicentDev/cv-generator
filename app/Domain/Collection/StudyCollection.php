@@ -1,10 +1,11 @@
 <?php
 
+use App\Domain\Shared\Duration;
 use IteratorAggregate;
 use Countable;
 use ArrayIterator;
 
-class StudyCollection implements IteratorAggregate, Countable
+class StudyCollection implements Countable
 {
   /** @var Studies[] */
   private array $items = [];
@@ -42,8 +43,17 @@ class StudyCollection implements IteratorAggregate, Countable
     return count($this->items);
   }
 
-  public function getIterator(): ArrayIterator
+  public static function fromArray(array $items): self
   {
-    return new ArrayIterator($this->items);
+    return new self(
+      array_map(
+        fn(array $item) => new Studies(
+          $item['degree'],
+          $item['institution'],
+          Duration::fromArray($item['duration'])
+        ),
+        $items
+      )
+    );
   }
 }

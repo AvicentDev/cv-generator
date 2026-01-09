@@ -5,7 +5,7 @@ use IteratorAggregate;
 use Countable;
 use ArrayIterator;
 
-final class SkillCollection implements IteratorAggregate, Countable
+final class SkillCollection implements Countable
 {
   /** @var Skill[] */
   private array $items = [];
@@ -45,12 +45,6 @@ final class SkillCollection implements IteratorAggregate, Countable
   {
     return count($this->items);
   }
-
-  public function getIterator(): ArrayIterator
-  {
-    return new ArrayIterator($this->items);
-  }
-
   private function ensureNoDuplicates(Skill $newSkill): void
   {
     foreach ($this->items as $existingSkill) {
@@ -58,5 +52,15 @@ final class SkillCollection implements IteratorAggregate, Countable
         throw new InvalidArgumentException('Duplicate skills are not allowed.');
       }
     }
+  }
+
+  public static function fromArray(array $items): self
+  {
+    return new self(
+      array_map(
+        fn(string $skill) => new Skill($skill),
+        $items
+      )
+    );
   }
 }

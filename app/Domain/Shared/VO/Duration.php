@@ -20,6 +20,23 @@ final class Duration
     return new self(new DateInterval($value));
   }
 
+  public static function fromArray(array $data): self
+  {
+    if (
+      !isset($data['years'], $data['months'], $data['days'])
+    ) {
+      throw new InvalidArgumentException('Invalid duration data.');
+    }
+
+    $interval = new DateInterval('P0D');
+    $interval->y = (int) $data['years'];
+    $interval->m = (int) $data['months'];
+    $interval->d = (int) $data['days'];
+
+    return new self($interval);
+  }
+
+
   private function ensureIsValid(DateInterval $interval): void
   {
     if (

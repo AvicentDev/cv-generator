@@ -1,10 +1,11 @@
 <?php
 
+use App\Domain\Shared\Duration;
 use IteratorAggregate;
 use Countable;
 use ArrayIterator;
 
-class WorkExperienceCollection implements IteratorAggregate, Countable
+class WorkExperienceCollection implements Countable
 {
   /** @var WorkExperience[] */
   private array $items = [];
@@ -42,8 +43,17 @@ class WorkExperienceCollection implements IteratorAggregate, Countable
     return count($this->items);
   }
 
-  public function getIterator(): ArrayIterator
+  public static function fromArray(array $items): self
   {
-    return new ArrayIterator($this->items);
+    return new self(
+      array_map(
+        fn(array $item) => new WorkExperience(
+          $item['job_title'],
+          $item['company_name'],
+          Duration::fromArray($item['duration'])
+        ),
+        $items
+      )
+    );
   }
 }
