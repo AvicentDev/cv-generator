@@ -23,6 +23,19 @@ class WorkExperience
     $this->duration = $duration;
   }
 
+
+  public function value(): string
+  {
+    return sprintf(
+      '%s en %s (%s)',
+      $this->job_title,
+      $this->company_name,
+      $this->duration
+    );
+  }
+
+
+
   private function ensureJobTitleIsValid(string $value): void
   {
     if (empty(trim($value))) {

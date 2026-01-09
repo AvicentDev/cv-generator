@@ -16,6 +16,14 @@ class WorkExperienceCollection implements IteratorAggregate, Countable
     }
   }
 
+  public function value(): array
+  {
+    return array_map(
+      fn(WorkExperience $experience) => $experience->value(),
+      $this->items
+    );
+  }
+
   public function add(WorkExperience $experience): void
   {
     $this->items[] = $experience;
