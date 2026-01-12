@@ -36,6 +36,26 @@ final class Duration
     return new self($interval);
   }
 
+  public function toString(): string
+  {
+    $parts = [];
+
+    if ($this->interval->y > 0) {
+      $parts[] = $this->interval->y . ' año' . ($this->interval->y > 1 ? 's' : '');
+    }
+
+    if ($this->interval->m > 0) {
+      $parts[] = $this->interval->m . ' mes' . ($this->interval->m > 1 ? 'es' : '');
+    }
+
+    if ($this->interval->d > 0) {
+      $parts[] = $this->interval->d . ' día' . ($this->interval->d > 1 ? 's' : '');
+    }
+
+    return implode(' ', $parts);
+  }
+
+
 
   private function ensureIsValid(DateInterval $interval): void
   {

@@ -38,13 +38,19 @@ final class CVConversationController
     $conversationId = $request->input('conversation_id');
 
     if (!$conversationId) {
-      return response()->json(['error' => 'conversation_id requerido'], 400);
+      return response()->json([
+        'error' => 'conversation_id requerido'
+      ], 400);
     }
 
-    $state = Cache::get("cv_conversation:$conversationId");
+    $cacheKey = "cv_conversation:$conversationId";
+    $state = Cache::get($cacheKey);
 
     if (!$state) {
-      return response()->json(['error' => 'Conversación no encontrada o expirada'], 404);
+      return response()->json([
+        'finished' => true,
+        'message' => 'La conversación ya ha finalizado o expirado.'
+      ]);
     }
 
     $newState = $this->handleCVAnswer->handle(
@@ -52,28 +58,35 @@ final class CVConversationController
       $request->input('answer')
     );
 
+
     if ($newState->step === 'finished') {
-      Cache::forget("cv_conversation:$conversationId");
 
       $cv = $this->build_cv->build($newState->draft);
       $cvText = $this->generate_cvtext->generate($cv);
 
+      Cache::put(
+        $cacheKey,
+        $newState,
+        now()->addMinutes(5)
+      );
+
       return response()->json([
         'finished' => true,
-        'message' => $newState->message,
-        'cv' => $cvText,
+        'message'  => $newState->message,
+        'cv'       => $cvText,
       ]);
     }
 
     Cache::put(
-      "cv_conversation:$conversationId",
+      $cacheKey,
       $newState,
       now()->addMinutes(30)
     );
 
     return response()->json([
-      'message' => $newState->message,
-      'step' => $newState->step,
+      'finished' => false,
+      'message'  => $newState->message,
+      'step'     => $newState->step,
     ]);
   }
 }

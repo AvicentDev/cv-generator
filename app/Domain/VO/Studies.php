@@ -30,7 +30,7 @@ class Studies
       '%s en %s (%s)',
       $this->degree,
       $this->institution,
-      $this->duration
+      $this->duration->toString()
     );
   }
 

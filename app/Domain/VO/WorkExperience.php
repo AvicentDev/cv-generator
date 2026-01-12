@@ -32,7 +32,7 @@ class WorkExperience
       '%s en %s (%s)',
       $this->job_title,
       $this->company_name,
-      $this->duration
+      $this->duration->toString()
     );
   }
 
