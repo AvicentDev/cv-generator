@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use BuildCVFromConversation;
-use GenerateCVText;
-use HandleCVAnswer;
+use App\Application\UseCases\BuildCVFromConversation;
+use App\Application\UseCases\GenerateCVText;
+use App\Application\UseCases\HandleCVAnswer;
+use App\Application\UseCases\StartCVConversation;
 use Illuminate\Http\Request;
-use StartCVConversation;
 
 final class CVConversationController
 {
