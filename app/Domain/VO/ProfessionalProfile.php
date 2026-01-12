@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Domain\VO;
+
 use InvalidArgumentException;
 
 class ProfessionalProfile

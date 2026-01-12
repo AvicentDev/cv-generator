@@ -1,4 +1,14 @@
 <?php
+
+namespace App\Application\UseCases;
+
+use App\Domain\Collection\SkillCollection;
+use App\Domain\Collection\StudyCollection;
+use App\Domain\Collection\WorkExperienceCollection;
+use App\Domain\CV\CVData;
+use App\Domain\VO\Name;
+use App\Domain\VO\ProfessionalProfile;
+
 class BuildCVFromConversation
 {
   public function build(object $draft): CVData

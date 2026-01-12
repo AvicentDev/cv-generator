@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Application\DTOs;
+
 final class CVDraft
 {
   public function __construct(

@@ -1,4 +1,18 @@
 <?php
+
+namespace App\Domain\CV;
+
+use App\Domain\Collection\SkillCollection;
+use App\Domain\Collection\StudyCollection;
+use App\Domain\Collection\WorkExperienceCollection;
+
+use App\Domain\VO\Name;
+use App\Domain\VO\ProfessionalProfile;
+use App\Domain\VO\Skill;
+use App\Domain\VO\Studies;
+use App\Domain\VO\WorkExperience;
+use DomainException;
+
 class CVData
 {
 

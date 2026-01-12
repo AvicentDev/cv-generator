@@ -1,5 +1,9 @@
 <?php
 
+namespace App\Application\UseCases;
+
+use App\Domain\CV\CVData;
+
 class GenerateCVText
 {
   public function generate(CVData $cv): string

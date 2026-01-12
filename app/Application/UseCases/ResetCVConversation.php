@@ -1,4 +1,10 @@
 <?php
+
+namespace App\Application\UseCases;
+
+use App\Application\DTOs\CVConversationState;
+use App\Application\DTOs\CVDraft;
+
 final class ResetCVConversation
 {
   public function reset(): CVConversationState

@@ -1,6 +1,10 @@
 <?php
 
+
+namespace App\Domain\Collection;
+
 use App\Domain\Shared\Duration;
+use App\Domain\VO\WorkExperience;
 use IteratorAggregate;
 use Countable;
 use ArrayIterator;

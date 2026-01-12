@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Application\DTOs;
+
 final class CVConversationState
 {
   public function __construct(

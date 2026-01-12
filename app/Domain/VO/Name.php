@@ -1,5 +1,9 @@
 <?php
 
+namespace App\Domain\VO;
+
+use InvalidArgumentException;
+
 class Name
 {
   public string $name;

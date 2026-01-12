@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Domain\VO;
+
 use App\Domain\Shared\Duration;
 use InvalidArgumentException;
 

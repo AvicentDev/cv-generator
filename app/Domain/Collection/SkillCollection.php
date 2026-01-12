@@ -1,9 +1,10 @@
 <?php
 
+namespace App\Domain\Collection;
+
+use App\Domain\VO\Skill;
 use InvalidArgumentException;
-use IteratorAggregate;
 use Countable;
-use ArrayIterator;
 
 final class SkillCollection implements Countable
 {

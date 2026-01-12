@@ -1,5 +1,11 @@
 <?php
 
+namespace App\Application\UseCases;
+
+use App\Application\DTOs\CVConversationState;
+
+use App\Application\Contracts\HandleCVAnswerInterface;
+
 final class HandleCVAnswer implements HandleCVAnswerInterface
 {
   public function handle(
