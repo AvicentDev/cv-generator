@@ -4,9 +4,8 @@ namespace App\Domain\Collection;
 
 use App\Domain\Shared\Duration;
 use App\Domain\VO\Studies;
-use IteratorAggregate;
+
 use Countable;
-use ArrayIterator;
 
 class StudyCollection implements Countable
 {

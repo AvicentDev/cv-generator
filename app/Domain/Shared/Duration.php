@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Shared\VO;
+namespace App\Domain\Shared;
 
 use DateInterval;
 use InvalidArgumentException;
