@@ -1,15 +1,14 @@
 <?php
-
 class BuildCVFromConversation
 {
-  public function build(array $cv_data): CVData
+  public function build(object $draft): CVData
   {
     return new CVData(
-      new Name($cv_data['data']['name']),
-      new ProfessionalProfile($cv_data['data']['professional_profile']),
-      WorkExperienceCollection::fromArray($cv_data['data']['work_experience']),
-      StudyCollection::fromArray($cv_data['data']['studies']),
-      SkillCollection::fromArray($cv_data['data']['skills'])
+      new Name($draft->name),
+      new ProfessionalProfile($draft->professionalProfile),
+      WorkExperienceCollection::fromArray($draft->workExperience),
+      StudyCollection::fromArray($draft->studies),
+      SkillCollection::fromArray($draft->skills),
     );
   }
 }
