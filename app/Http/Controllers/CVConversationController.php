@@ -7,6 +7,8 @@ use App\Application\UseCases\GenerateCVText;
 use App\Application\UseCases\HandleCVAnswer;
 use App\Application\UseCases\StartCVConversation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 final class CVConversationController
 {
@@ -14,23 +16,64 @@ final class CVConversationController
   public function start(Request $request)
   {
     $state = $this->startConversation->start();
-    $request->session()->put('cv_state', $state);
-    return response()->json(['message' => $state->message, 'step' => $state->step,]);
+
+    $conversationId = (string) Str::uuid();
+
+    Cache::put(
+      "cv_conversation:$conversationId",
+      $state,
+      now()->addMinutes(30)
+    );
+
+    return response()->json([
+      'conversation_id' => $conversationId,
+      'message' => $state->message,
+      'step' => $state->step,
+    ]);
   }
+
+
   public function answer(Request $request)
   {
-    $state = $request->session()->get('cv_state');
-    if (!$state) {
-      return response()->json(['error' => 'La conversación no ha sido iniciada'], 400);
+    $conversationId = $request->input('conversation_id');
+
+    if (!$conversationId) {
+      return response()->json(['error' => 'conversation_id requerido'], 400);
     }
-    $newState = $this->handleCVAnswer->handle($state, $request->input('answer'));
-    $request->session()->put('cv_state', $newState);
+
+    $state = Cache::get("cv_conversation:$conversationId");
+
+    if (!$state) {
+      return response()->json(['error' => 'Conversación no encontrada o expirada'], 404);
+    }
+
+    $newState = $this->handleCVAnswer->handle(
+      $state,
+      $request->input('answer')
+    );
+
     if ($newState->step === 'finished') {
+      Cache::forget("cv_conversation:$conversationId");
+
       $cv = $this->build_cv->build($newState->draft);
       $cvText = $this->generate_cvtext->generate($cv);
-      $request->session()->forget('cv_state');
-      return response()->json(['finished' => true, 'message' => $newState->message, 'cv' => $cvText,]);
+
+      return response()->json([
+        'finished' => true,
+        'message' => $newState->message,
+        'cv' => $cvText,
+      ]);
     }
-    return response()->json(['message' => $newState->message, 'step' => $newState->step,]);
+
+    Cache::put(
+      "cv_conversation:$conversationId",
+      $newState,
+      now()->addMinutes(30)
+    );
+
+    return response()->json([
+      'message' => $newState->message,
+      'step' => $newState->step,
+    ]);
   }
 }
