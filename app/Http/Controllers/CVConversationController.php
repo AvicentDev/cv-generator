@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\Services\EnhanceCVText;
 use App\Application\UseCases\BuildCVFromConversation;
 use App\Application\UseCases\GenerateCVText;
 use App\Application\UseCases\HandleCVAnswer;
@@ -12,11 +13,17 @@ use Illuminate\Support\Str;
 
 final class CVConversationController
 {
-  public function __construct(private StartCVConversation $startConversation, private HandleCVAnswer $handleCVAnswer, private BuildCVFromConversation $build_cv, private GenerateCVText $generate_cvtext) {}
+  public function __construct(
+    private StartCVConversation $startConversation,
+    private HandleCVAnswer $handleCVAnswer,
+    private BuildCVFromConversation $buildCV,
+    private GenerateCVText $generateCVText,
+    private EnhanceCVText $enhanceCVText
+  ) {}
+
   public function start(Request $request)
   {
     $state = $this->startConversation->start();
-
     $conversationId = (string) Str::uuid();
 
     Cache::put(
@@ -27,19 +34,26 @@ final class CVConversationController
 
     return response()->json([
       'conversation_id' => $conversationId,
-      'message' => $state->message,
-      'step' => $state->step,
+      'message'         => $state->message,
+      'step'            => $state->step,
     ]);
   }
 
-
   public function answer(Request $request)
   {
-    $conversationId = $request->input('conversation_id');
+    $conversationId = (string) $request->input('conversation_id');
 
-    if (!$conversationId) {
+    if ($conversationId === '') {
       return response()->json([
         'error' => 'conversation_id requerido'
+      ], 400);
+    }
+
+    $answer = trim((string) $request->input('answer'));
+
+    if ($answer === '') {
+      return response()->json([
+        'error' => 'answer requerido'
       ], 400);
     }
 
@@ -49,21 +63,38 @@ final class CVConversationController
     if (!$state) {
       return response()->json([
         'finished' => true,
-        'message' => 'La conversación ya ha finalizado o expirado.'
+        'message'  => 'La conversación ya ha finalizado o ha expirado.',
       ]);
     }
 
-    $newState = $this->handleCVAnswer->handle(
-      $state,
-      $request->input('answer')
-    );
+    $newState = $this->handleCVAnswer->handle($state, $answer);
 
-
+    // Conversación finalizada
     if ($newState->step === 'finished') {
 
-      $cv = $this->build_cv->build($newState->draft);
-      $cvText = $this->generate_cvtext->generate($cv);
+      $enhancedCacheKey = "cv_enhanced:$conversationId";
 
+      // Si ya existe el CV mejorado, lo devolvemos directamente
+      if (Cache::has($enhancedCacheKey)) {
+        return response()->json([
+          'finished' => true,
+          'message'  => $newState->message,
+          'cv'       => Cache::get($enhancedCacheKey),
+        ]);
+      }
+
+      // Construcción del CV
+      $cv = $this->buildCV->build($newState->draft);
+      $cvText = $this->generateCVText->generate($cv);
+
+      // Cache para evitar múltiples llamadas a OpenAI
+      $cvTextEnhanced = Cache::remember(
+        $enhancedCacheKey,
+        now()->addHours(1),
+        fn() => $this->enhanceCVText->enhance($cvText)
+      );
+
+      // Guardamos estado final por poco tiempo
       Cache::put(
         $cacheKey,
         $newState,
@@ -73,10 +104,11 @@ final class CVConversationController
       return response()->json([
         'finished' => true,
         'message'  => $newState->message,
-        'cv'       => $cvText,
+        'cv'       => $cvTextEnhanced,
       ]);
     }
 
+    // Conversación en curso
     Cache::put(
       $cacheKey,
       $newState,

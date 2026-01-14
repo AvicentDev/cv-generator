@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use OpenAI;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Registramos el cliente de OpenAI para inyección de dependencias
+        $this->app->singleton(\OpenAI\Client::class, function () {
+            return OpenAI::client(env('OPENAI_API_KEY'));
+        });
     }
 
     /**

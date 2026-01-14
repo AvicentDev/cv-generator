@@ -1,1 +1,0 @@
-1768221316O:40:"App\Application\DTOs\CVConversationState":3:{s:4:"step";s:4:"name";s:5:"draft";O:28:"App\Application\DTOs\CVDraft":5:{s:4:"name";N;s:19:"professionalProfile";N;s:14:"workExperience";a:0:{}s:7:"studies";a:0:{}s:6:"skills";a:0:{}}s:7:"message";s:65:"Hola 👋 Empezamos a crear tu CV. ¿Cuál es tu nombre completo?";}
