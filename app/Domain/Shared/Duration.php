@@ -28,10 +28,28 @@ final class Duration
       throw new InvalidArgumentException('Invalid duration data.');
     }
 
-    $interval = new DateInterval('P0D');
-    $interval->y = (int) $data['years'];
-    $interval->m = (int) $data['months'];
-    $interval->d = (int) $data['days'];
+    $years = (int) $data['years'];
+    $months = (int) $data['months'];
+    $days = (int) $data['days'];
+
+    // Construir el string ISO 8601 correctamente
+    $durationString = 'P';
+    if ($years > 0) {
+      $durationString .= $years . 'Y';
+    }
+    if ($months > 0) {
+      $durationString .= $months . 'M';
+    }
+    if ($days > 0) {
+      $durationString .= $days . 'D';
+    }
+
+    // Si no hay ningún valor, usar P0D
+    if ($durationString === 'P') {
+      $durationString = 'P0D';
+    }
+
+    $interval = new DateInterval($durationString);
 
     return new self($interval);
   }
@@ -59,10 +77,7 @@ final class Duration
 
   private function ensureIsValid(DateInterval $interval): void
   {
-    if (
-      $interval->invert === 1 ||
-      ($interval->y === 0 && $interval->m === 0 && $interval->d === 0)
-    ) {
+    if ($interval->invert === 1) {
       throw new InvalidArgumentException('Duration must be positive.');
     }
   }

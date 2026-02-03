@@ -15,26 +15,61 @@ final class EnhanceCVText
   {
     Log::info('[EnhanceCVText] Método enhance() llamado');
 
-    $model = env('OPENAI_MODEL', 'gpt-4.1-mini');
+    $model = config('services.openai.model', 'gpt-4o-mini');
 
     $prompt = <<<PROMPT
-Corrige y mejora profesionalmente el siguiente CV.
+Eres un experto en redacción de CVs profesionales. Tu tarea es mejorar y optimizar el siguiente CV.
 
-Instrucciones:
-- Corrige todos los errores ortográficos y gramaticales.
-- Corrige mayúsculas y minúsculas.
-- Mejora la redacción para que sea clara, profesional y natural.
-- NO añadas información nueva.
-- NO elimines información existente.
-- Devuelve el resultado en **Markdown**, con títulos y listas claras.
-- NO incluyas explicaciones ni comentarios adicionales.
+INSTRUCCIONES IMPORTANTES:
+1. **Corrige ortografía y gramática**: Revisa todos los errores ortográficos, gramaticales y de puntuación.
+2. **Mejora la redacción**: Haz que el lenguaje sea más profesional, claro y convincente. Usa verbos de acción (desarrollé, implementé, optimicé, gestioné, diseñé, etc.).
+3. **Formato Markdown limpio y consistente**:
+   - Usa ## para los títulos de sección (ej: ## NOMBRE, ## EXPERIENCIA PROFESIONAL)
+   - NO uses negritas (**) en el texto del contenido, solo títulos simples
+   - Usa viñetas (-) para listas de elementos
+   - Separa secciones con una línea en blanco
 
-CV ORIGINAL (contenido literal):
+4. **Estructura que DEBES seguir exactamente**:
+
+## NOMBRE
+[Nombre completo de la persona]
+
+## CONTACTO
+[Ciudad, País · Email · Teléfono · LinkedIn]
+
+## PERFIL PROFESIONAL
+[Descripción profesional en párrafo corrido, sin viñetas. Debe ser un texto coherente que resuma las capacidades y enfoque profesional]
+
+## EXPERIENCIA PROFESIONAL
+- [Título del puesto] en [Empresa] ([Duración ejemplo: 2 años])
+Descripción de responsabilidades y logros en texto corrido.
+
+## PROYECTOS PERSONALES (si aplica)
+- [Nombre del Proyecto] - Descripción del proyecto y tecnologías utilizadas.
+
+## EDUCACIÓN
+- [Título/Grado] en [Institución] ([Duración ejemplo: 2 años])
+
+## HABILIDADES TÉCNICAS
+- Lenguajes de programación: [lista separada por comas]
+- Frameworks & Librerías: [lista separada por comas]
+- Bases de datos: [lista separada por comas]
+- Herramientas: [lista separada por comas]
+
+5. **Reglas estrictas de formato**:
+   - NO uses asteriscos dobles (**) para negritas en el contenido
+   - NO uses # (un solo hash) para títulos, siempre usa ##
+   - Mantén el texto limpio y sin formato markdown innecesario
+   - Separa bien las secciones con líneas en blanco
+
+6. **NO inventes información**: Solo mejora lo que ya está presente.
+
+CV ORIGINAL:
 """
 $cvText
 """
 
-Devuelve **solo** el texto final en Markdown.
+Devuelve **únicamente** el CV mejorado siguiendo EXACTAMENTE la estructura indicada, sin explicaciones adicionales.
 PROMPT;
 
     $attempts = 0;
@@ -52,15 +87,15 @@ PROMPT;
           'messages' => [
             [
               'role' => 'system',
-              'content' => 'Eres un editor profesional de CVs y experto en formateo Markdown.'
+              'content' => 'Eres un consultor experto en recursos humanos y redacción profesional de CVs. Sigues exactamente las instrucciones de formato proporcionadas y generas contenido limpio sin formato markdown innecesario.'
             ],
             [
               'role' => 'user',
               'content' => $prompt
             ],
           ],
-          'temperature' => 0.3,
-          'max_tokens'  => 1200,
+          'temperature' => 0.5,  // Balance entre creatividad y consistencia
+          'max_tokens'  => 2000,
         ]);
 
         $result = trim($response->choices[0]->message->content);
@@ -81,7 +116,8 @@ PROMPT;
         sleep(2 * $attempts);
       } catch (Throwable $e) {
         Log::error('[EnhanceCVText] Error inesperado', [
-          'exception' => $e,
+          'exception' => $e->getMessage(),
+          'trace' => $e->getTraceAsString(),
         ]);
 
         return $cvText;

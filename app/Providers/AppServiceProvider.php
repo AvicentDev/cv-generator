@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registramos el cliente de OpenAI para inyección de dependencias
         $this->app->singleton(\OpenAI\Client::class, function () {
-            return OpenAI::client(env('OPENAI_API_KEY'));
+            return OpenAI::client(config('services.openai.api_key'));
         });
     }
 
