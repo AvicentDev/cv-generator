@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Application\Services\EnhanceCVText;
+use App\Application\Services\OpenAIEnhancer;
 use App\Application\Services\CVSuggestionsService;
 use App\Application\UseCases\BuildCVFromConversation;
 use App\Application\UseCases\GenerateCVText;
@@ -22,11 +23,12 @@ final class CVConversationController
     private HandleCVAnswer $handleCVAnswer,
     private BuildCVFromConversation $buildCV,
     private GenerateCVText $generateCVText,
-    private EnhanceCVText $enhanceCVText
+    private EnhanceCVText $enhanceCVText,
+    private OpenAIEnhancer $enhancer
   ) {}
 
-  public function start(Request $request)
-  {
+  public function start(Request $request) {
+    // ... (method body omitted as it's unchanged until answer method)
     try {
       $state = $this->startConversation->start();
       $conversationId = (string) Str::uuid();
@@ -110,27 +112,9 @@ final class CVConversationController
       // Conversación finalizada
       if ($newState->step === 'finished') {
 
-        $enhancedCacheKey = "cv_enhanced:$conversationId";
-
-        // Si ya existe el CV mejorado, lo devolvemos directamente
-        if (Cache::has($enhancedCacheKey)) {
-          return response()->json([
-            'finished' => true,
-            'message' => $newState->message,
-            'cv' => Cache::get($enhancedCacheKey),
-          ]);
-        }
-
         // Construcción del CV
         $cv = $this->buildCV->build($newState->draft);
         $cvText = $this->generateCVText->generate($cv);
-
-        // Cache para evitar múltiples llamadas a OpenAI
-        $cvTextEnhanced = Cache::remember(
-          $enhancedCacheKey,
-          now()->addHours(1),
-          fn() => $this->enhanceCVText->enhance($cvText)
-        );
 
         // Guardamos estado final por poco tiempo
         Cache::put(
@@ -139,19 +123,96 @@ final class CVConversationController
           now()->addMinutes(5)
         );
 
+        // Formatear experiencia laboral
+        $formattedExperience = [];
+        foreach ($newState->draft->workExperience ?? [] as $exp) {
+          $jobTitle = $exp['job_title'] ?? '';
+          $company = $exp['company_name'] ?? '';
+          $description = $exp['description'] ?? '';
+
+          $durationText = '';
+          if (isset($exp['duration'])) {
+             $years = $exp['duration']['years'] ?? 0;
+             $months = $exp['duration']['months'] ?? 0;
+             if ($years > 0 || $months > 0) {
+                 $parts = [];
+                 if ($years > 0) $parts[] = "$years " . ($years == 1 ? 'año' : 'años');
+                 if ($months > 0) $parts[] = "$months " . ($months == 1 ? 'mes' : 'meses');
+                 $durationText = implode(' y ', $parts);
+             }
+          }
+
+          $item = "";
+          if ($jobTitle === 'Experiencia Laboral' || $jobTitle === 'Experiencia') {
+              $item = $company . ($durationText ? " ($durationText)" : '');
+          } else {
+              $item = "$jobTitle - $company" . ($durationText ? " ($durationText)" : '');
+          }
+
+          if ($description) {
+              $item .= "\n" . $description;
+          }
+
+          $formattedExperience[] = $item;
+        }
+
+        $formattedStudies = [];
+        foreach ($newState->draft->studies ?? [] as $stu) {
+             $degree = $stu['degree'] ?? '';
+             $institution = $stu['institution'] ?? '';
+
+             $durationText = '';
+             if (isset($stu['duration'])) {
+                $years = $stu['duration']['years'] ?? 0;
+                $months = $stu['duration']['months'] ?? 0;
+                if ($years > 0 || $months > 0) {
+                    $parts = [];
+                    if ($years > 0) $parts[] = "$years " . ($years == 1 ? 'año' : 'años');
+                    if ($months > 0) $parts[] = "$months " . ($months == 1 ? 'mes' : 'meses');
+                    $durationText = implode(' y ', $parts);
+                }
+             }
+
+             if ($degree === 'Formación' || $degree === 'Estudios') {
+                 $formattedStudies[] = $institution . ($durationText ? " ($durationText)" : '');
+             } else {
+                 $formattedStudies[] = "$degree - $institution" . ($durationText ? " ($durationText)" : '');
+             }
+        }
+
+        $perfilMejorado = $newState->draft->professionalProfile
+          ? $this->enhancer->enhanceProfile($newState->draft->professionalProfile)
+          : '';
+
+        $experienciaMejorada = !empty($formattedExperience)
+          ? $this->enhancer->enhanceExperience(implode("\n\n", $formattedExperience))
+          : '';
+
+        $educacionMejorada = !empty($formattedStudies)
+          ? $this->enhancer->enhanceEducation(implode("\n\n", $formattedStudies))
+          : '';
+
+        // Generar título basado en el perfil mejorado
+        $tituloGenerado = $perfilMejorado
+          ? $this->enhancer->generateTitle($perfilMejorado)
+          : '';
+
+        // Formatear nombre (capitalizar)
+        $nombreFormateado = ucwords(strtolower($newState->draft->name ?? ''));
+
         return response()->json([
           'finished' => true,
           'message' => $newState->message,
           'cv' => [
-            'nombre' => $newState->draft->name ?? '',
-            'perfil' => $newState->draft->professionalProfile ?? '',
-            'experiencia' => $cvTextEnhanced, // Texto mejorado de experiencia
-            'educacion' => $this->formatStudies($newState->draft->studies ?? []),
+            'nombre' => $nombreFormateado,
+            'titulo' => $tituloGenerado,
+            'perfil' => $perfilMejorado,
+            'experiencia' => $experienciaMejorada,
+            'educacion' => $educacionMejorada,
             'habilidades' => is_array($newState->draft->skills)
               ? implode(', ', $newState->draft->skills)
               : ($newState->draft->skills ?? ''),
           ],
-          'cv_text_enhanced' => $cvTextEnhanced, // Texto completo mejorado (opcional)
         ]);
       }
 

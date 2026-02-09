@@ -17,16 +17,19 @@ final class CVSuggestionsService
                 'Diseñador UX/UI enfocado en crear experiencias digitales intuitivas',
             ],
             'work_experience' => [
-                'Desarrollador Senior;TechCorp;3;6;0',
-                'Ingeniero de Software;StartupXYZ;2;0;0',
+                'Trabajé como Desarrollador Senior en TechCorp durante 3 años y medio',
+                'Fui Ingeniero de Software en StartupXYZ por 2 años',
+                'Desarrollador Full Stack en Acme Corp, 4 años',
             ],
             'studies' => [
-                'Ingeniería en Sistemas;Universidad Nacional;4;0;0',
-                'Licenciatura en Informática;Instituto Tecnológico;3;6;0',
+                'Estudié Ingeniería en Sistemas en la Universidad Nacional durante 4 años',
+                'Licenciatura en Informática en el Instituto Tecnológico, 3 años y medio',
+                'Ingeniería de Software en la Universidad Politécnica por 5 años',
             ],
             'skills' => [
-                'JavaScript, TypeScript, React, Node.js, Python, SQL',
-                'Java, Spring Boot, Docker, Kubernetes, AWS, MongoDB',
+                'JavaScript React Node Python SQL Docker',
+                'Java Spring Boot Kubernetes AWS MongoDB',
+                'TypeScript Next.js PostgreSQL Redis Git',
             ],
             default => [],
         };
@@ -67,20 +70,20 @@ final class CVSuggestionsService
                 'max_length' => 100,
             ],
             'professional_profile' => [
-                'min_length' => 50,
+                'min_length' => 20,
                 'max_length' => 500,
             ],
             'work_experience' => [
-                'format' => 'Cargo;Empresa;Años;Meses;Días',
-                'example' => 'Desarrollador Senior;TechCorp;3;6;0',
+                'format' => 'Lenguaje natural',
+                'example' => 'Trabajé como Desarrollador Senior en TechCorp durante 3 años y medio',
             ],
             'studies' => [
-                'format' => 'Título;Institución;Años;Meses;Días',
-                'example' => 'Ingeniería en Sistemas;Universidad Nacional;4;0;0',
+                'format' => 'Lenguaje natural',
+                'example' => 'Estudié Ingeniería en Sistemas en la Universidad Nacional durante 4 años',
             ],
             'skills' => [
-                'format' => 'Separadas por comas',
-                'example' => 'JavaScript, React, Node.js, Python',
+                'format' => 'Lenguaje natural o separadas por espacios',
+                'example' => 'JavaScript React Node.js Python SQL Docker',
             ],
             default => [],
         };

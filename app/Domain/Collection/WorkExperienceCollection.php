@@ -52,6 +52,7 @@ class WorkExperienceCollection implements Countable
         fn(array $item) => new WorkExperience(
           $item['job_title'],
           $item['company_name'],
+          $item['description'] ?? null,
           Duration::fromArray($item['duration'])
         ),
         $items

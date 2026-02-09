@@ -9,12 +9,14 @@ class WorkExperience
 {
   public readonly string $job_title;
   public readonly string $company_name;
+  public readonly ?string $description;
   public readonly Duration $duration;
 
 
   public function __construct(
     string $job_title,
     string $company_name,
+    ?string $description,
     Duration $duration
   ) {
     $this->ensureJobTitleIsValid($job_title);
@@ -22,18 +24,25 @@ class WorkExperience
 
     $this->job_title   = $job_title;
     $this->company_name = $company_name;
+    $this->description = $description;
     $this->duration = $duration;
   }
 
 
   public function value(): string
   {
-    return sprintf(
+    $base = sprintf(
       '%s en %s (%s)',
       $this->job_title,
       $this->company_name,
       $this->duration->toString()
     );
+
+    if ($this->description) {
+        return $base . PHP_EOL . $this->description;
+    }
+
+    return $base;
   }
 
 

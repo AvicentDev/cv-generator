@@ -26,8 +26,8 @@ class ProfessionalProfile
       throw new InvalidArgumentException('Professional profile cannot be empty.');
     }
 
-    if (strlen($value) < 30) {
-      throw new InvalidArgumentException('Professional profile must be at least 30 characters long.');
+    if (strlen($value) < 10) {
+      throw new InvalidArgumentException('Professional profile must be at least 10 characters long.');
     }
 
     if (strlen($value) > 500) {
