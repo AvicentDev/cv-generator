@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cv-generator
+    env: docker
+    plan: free
+    region: frankfurt
+    branch: master
+    numInstances: 1
+    healthCheckPath: /
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_NAME
+        value: cv_generator
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
