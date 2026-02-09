@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Domain\VO;
+
+use InvalidArgumentException;
+
+class ProfessionalProfile
+{
+  public readonly string $value;
+
+  public function __construct(string $value)
+  {
+    $this->ensureProfileIsValid($value);
+
+    $this->value = $value;
+  }
+
+  public function value()
+  {
+    return $this->value;
+  }
+
+  private function ensureProfileIsValid(string $value): void
+  {
+    if (empty(trim($value))) {
+      throw new InvalidArgumentException('Professional profile cannot be empty.');
+    }
+
+    if (strlen($value) < 10) {
+      throw new InvalidArgumentException('Professional profile must be at least 10 characters long.');
+    }
+
+    if (strlen($value) > 500) {
+      throw new InvalidArgumentException('Professional profile cannot exceed 500 characters.');
+    }
+  }
+}
